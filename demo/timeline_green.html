@@ -1,0 +1,243 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Timeline Demo</title>
+    <style>
+        body {
+            background-color: black;
+        }
+
+        #canvas {
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+        }
+
+        /*#div {
+            width: 500px;
+            height: 30px;
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+            background-color: wheat;
+        }*/
+    </style>
+</head>
+<body>
+    <canvas id="canvas" width="300" height="300"></canvas>
+    <!--<div id="div"></div>-->
+
+    <script>
+
+        var canvas = document.getElementById("canvas");
+        var ctx = canvas.getContext("2d");
+
+        //ctx.strokeStyle = '#B7FF4A';
+        ctx.strokeStyle = 'rgba(225,225,100,180)';
+        ctx.lineWidth = 17;
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = '#ECECFF'
+
+        function degToRad(degree) {
+            var factor = Math.PI / 180;
+            return degree * factor;
+        }
+
+
+        var globalID;
+        var vYear, vMonth, vDay, vHour, vMin, vSec;
+        var pause = false;
+        var vH = false;
+
+        function renderTime(yyyy, MM, dd, hh, mm, ss) {
+
+            var now = new Date();
+            //var today = now.toDateString();
+            //var time = now.toLocaleTimeString();
+            //var hrs = now.getHours();
+            //var min = now.getMinutes();
+            //var sec = now.getSeconds();
+            //var mil = now.getMilliseconds();
+            //var smoothsec = sec + (mil / 1000);
+            //var smoothmin = min + (smoothsec / 60);
+
+            var today = yyyy + " " + MM + " " + dd;
+            var time = hh + ":" + mm + ":" + ss;
+            var hrs = hh;
+            var min = mm;
+            var sec = ss;
+            var mil = now.getMilliseconds();
+            var smoothsec = sec + (mil / 1000);
+            var smoothmin = min + (smoothsec / 60);
+            //var timeObj = {};
+
+            //Background
+            gradient = ctx.createRadialGradient(150, 150, 5, 150, 150, 300);
+            gradient.addColorStop(0, "#03303a");
+            gradient.addColorStop(1, "black");
+            ctx.fillStyle = gradient;
+            //ctx.fillStyle = 'rgba(00 ,00 , 00, 1)';
+            ctx.fillRect(0, 0, 500, 500);
+
+            //Hours
+            ctx.beginPath();
+            var hrs2 = hrs;
+            if (hrs == 0) { hrs2 = 12; }
+            ctx.arc(150, 150, 135, degToRad(270), degToRad((hrs2 * 30) - 90));
+            //ctx.lineWidth = 10;
+            ctx.stroke();
+            //Minutes
+            ctx.beginPath();
+            ctx.arc(150, 150, 105, degToRad(270), degToRad((smoothmin * 6) - 90));
+            ctx.stroke();
+            //Seconds
+            ctx.beginPath();
+            ctx.arc(150, 150, 75, degToRad(270), degToRad((smoothsec * 6) - 90));
+            ctx.stroke();
+            //Date
+            ctx.font = "18px Helvetica";
+            //ctx.fillStyle = 'rgba(00, 255, 255, 1)'
+            ctx.fillStyle = 'rgba(128, 255, 255, 120)';
+            ctx.fillText(today, 100, 140);
+            //Time
+            ctx.font = "18px Helvetica Bold";
+            //ctx.fillStyle = 'rgba(00, 255, 255, 1)';
+            ctx.fillStyle = 'rgba(128, 255, 255, 120)';
+            ctx.fillText(time + ":" + mil, 105, 170);
+
+
+            sec += 1;
+            if (sec == 60) { sec = 0; min += 1; }
+            if (min == 60) { min = 0; hrs += 1; }
+            if (hrs > 12) { vH = true; }
+            if (hrs == 24) { hrs = 0; dd += 1; vH = false; }
+            if (dd > 31) { if (MM == 1 || MM == 3 || MM == 5 || MM == 7 || MM == 8 || MM == 10) { dd = 1; MM += 1; } else if (MM == 12) { dd = 1; MM = 1; yyyy += 1; } }
+            if (dd > 30) { if (MM == 4 || MM == 6 || MM == 9 || MM == 11) { dd = 1; MM += 1; } }
+            if (dd > 28) { if (MM == 2 && yyyy % 4 != 0) { dd = 1; MM += 1; } }
+            if (dd > 29) { if (MM == 2 && yyyy % 4 == 0) { dd = 1; MM += 1; } }
+
+            //var ValueToString = yyyy.toString() + " " + MM.toString() + " " +
+            //    dd.toString() + " " + hrs.toString() + ":" +
+            //    min.toString() + ":" + sec.toString() + ":" + mil.toString();
+
+            //canvas.onmouseover = function () { div.innerText = ValueToString; };
+            //canvas.onmouseout = function () { div.innerText = "" };
+
+            //timeObj["yyyy"] = yyyy;
+            //timeObj["MM"] = MM;
+            //timeObj["dd"] = dd;
+            //timeObj["hh"] = hrs;
+            //timeObj["mm"] = min;
+            //timeObj["ss"] = sec;
+            //timeObj["ms"] = mil;
+
+            vYear = yyyy; vMonth = MM; vDay = dd; vHour = hrs; vMin = min; vSec = sec;
+            globalID = requestAnimationFrame(function () { renderTime(yyyy, MM, dd, hrs, min, sec) });
+        }
+        //setInterval(renderTime, 40);
+
+
+        var animateClock = renderTime(2017, 06, 30, 17, 51, 20);
+
+        var div = document.getElementById('div');
+
+        canvas.addEventListener('mousemove', function (evt) {
+            var mousePos = getMousePos(canvas, evt);
+            console.log('Mouse position: ' + mousePos.x + ',' + mousePos.y);
+
+            var x = mousePos.x - 250;
+            var y = 250 - mousePos.y;
+            var r = Math.sqrt(x * x + y * y);
+            console.log('Mouse position: ' + x + ',' + y);
+
+            var result = calculateClock(x, y);
+            console.log("���B�O�G" + result.value + result.measurement);
+
+        }, false);
+
+        canvas.addEventListener('click', function (evt) {
+            var mousePos = getMousePos(canvas, evt);
+            //console.log('Mouse position: ' + mousePos.x + ',' + mousePos.y);
+
+            var x = mousePos.x - 250;
+            var y = 250 - mousePos.y;
+            var r = Math.sqrt(x * x + y * y);
+            var result = calculateClock(x, y);
+
+            if (result.measurement == "H" && vH == false) {
+                cancelAnimationFrame(globalID);
+                return renderTime(vYear, vMonth, vDay, result.value, vMin, vSec);
+            } else if (result.measurement == "H" && vH == true) {
+                cancelAnimationFrame(globalID);
+                return renderTime(vYear, vMonth, vDay, result.value + 12, vMin, vSec);
+            }
+            else if (result.measurement == "M") {
+                cancelAnimationFrame(globalID);
+                return renderTime(vYear, vMonth, vDay, vHour, result.value, vSec);
+            } else if (result.measurement == "S") {
+                cancelAnimationFrame(globalID);
+                return renderTime(vYear, vMonth, vDay, vHour, vMin, result.value);
+            }
+            else if (pause == true) { return renderTime(vYear, vMonth, vDay, vHour, vMin, vSec), pause = false; }
+            else if (pause == false) { cancelAnimationFrame(globalID); return pause = true; }
+        }, false);
+
+
+
+        function getMousePos(canvas, evt) {
+            var rect = canvas.getBoundingClientRect();
+            return {
+                x: evt.clientX - rect.left,
+                y: evt.clientY - rect.top
+            };
+        }
+
+        //return theta
+        function xyToTheta(x, y) {
+            var lxl = Math.abs(x);
+            var r = Math.sqrt(x * x + y * y);
+            var cos = lxl / r;
+            var theta = Math.acos(cos) * (180 / Math.PI);
+
+            if (x > 0 && y > 0) { theta = 90 - theta; }
+            else if (x > 0 && y < 0) { theta = theta + 90 }
+            else if (x < 0 && y < 0) { theta = 270 - theta }
+            else if (x < 0 && y > 0) { theta = 270 + theta }
+            else { return }
+
+            return theta;
+        }
+
+        //positionToClock
+        //��b�|�A200 170 140�A����e��(20)�A+-10
+        function xyToClock(x, y) {
+            var r = Math.sqrt(x * x + y * y);
+            var clock = "";
+            if (r > 200 - 10 && r < 200 + 10) { clock = "H"; }
+            else if (r > 170 - 10 && r < 170 + 10) { clock = "M"; }
+            else if (r > 140 - 10 && r < 140 + 10) { clock = "S" }
+            else { clock = "N"; }
+            return clock;
+        }
+
+        function calculateClock(x, y) {
+            var theta = xyToTheta(x, y);
+            var clock = xyToClock(x, y);
+            var result;
+            var resultObj = {};
+
+            if (clock == "H") { result = Math.floor(theta / 30); }
+            else if (clock == "M" || clock == "S") { result = Math.floor(theta / 6); }
+            else { result = null }
+            resultObj["value"] = result;
+            resultObj["measurement"] = clock;
+            return resultObj;
+        }
+
+
+
+    </script>
+</body>
+</html>

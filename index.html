@@ -1,0 +1,49 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Timeline Demo</title>
+    <script src="timeline.js"></script>
+    <style>
+        body {
+            background-color:black;
+        }
+        div {
+            width:400px;height:400px;
+            position:absolute;
+            top:0;
+            left:0;
+            right:0;
+            bottom:0;
+            margin: auto auto;
+        }
+        #btn {
+            width:250px;
+            height:50px;
+        }
+    </style>
+</head>
+<body>
+    <div id="testdiv">
+        <button id="btn">Click me first to Slow down! More Click for Speed up! Go to see console!</button>
+    </div>
+    <script>
+        var t = new timeline();
+        t.setSpeed(200);
+
+        t.setColor("black", "red", "white", "blue", "rgba(0, 0, 0, 1)", "rgba(0, 0, 0, 1)");
+        t.create("testdiv");
+        t.start();
+        //var p = false;
+        var z = 10;
+        document.getElementById('btn').addEventListener("click", function () {
+            var obj = t.getTime();
+            console.log(obj.year + "/" + obj.month + "/" + obj.day + " " + obj.hour + ":" + obj.minute + ":" + obj.seccond + ":" + obj.milsecond);
+            t.setSpeed(z);
+            console.log('speed=' + z);
+            z+=10;
+        })
+    </script>
+</body>
+</html>
